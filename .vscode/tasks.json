@@ -1,0 +1,31 @@
+{
+    "tasks": [
+        {
+            "command": "ansible-playbook main.yaml",
+            "group": {
+                "isDefault": true,
+                "kind": "build",
+            },
+            "label": "Ansible Run",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+            },
+            "type": "shell",
+        },
+        {
+            "command": "molecule test",
+            "group": {
+                "isDefault": true,
+                "kind": "test",
+            },
+            "label": "Ansible Molecule",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+            },
+            "type": "shell",
+        }
+    ],
+    "version": "2.0.0",
+}

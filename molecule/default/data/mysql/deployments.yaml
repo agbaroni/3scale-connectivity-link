@@ -1,0 +1,40 @@
+---
+# mysql -uroot -e "SET GLOBAL log_bin_trust_function_creators = 1;"
+# mysql -uroot -e "GRANT SUPER ON *.* TO 'system'@'%';"
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: 3scale-persistence
+  name: system-database
+spec:
+  selector:
+    matchLabels:
+      app: system-database
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: system-database
+    spec:
+      containers:
+        - name: container
+          image: registry.redhat.io/rhel9/mysql-80:latest
+          env:
+            - name: MYSQL_USER
+              value: system
+            - name: MYSQL_PASSWORD
+              value: password
+            - name: MYSQL_DATABASE
+              value: system
+            - name: MYSQL_ROOT_PASSWORD
+              value: password
+          ports:
+            - containerPort: 3306
+              protocol: TCP
+          volumeMounts:
+            - mountPath:  /var/lib/mysql/data
+              name: data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: system-database

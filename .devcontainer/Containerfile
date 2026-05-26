@@ -1,0 +1,6 @@
+FROM quay.io/fedora/fedora-minimal:44
+
+RUN echo "install_weak_deps=False" >> /etc/dnf/dnf.conf \
+ && microdnf --assumeyes install ansible git gzip python3-ansible-lint python3-pip tar \
+ && microdnf clean all \
+ && pip install molecule molecule-plugins

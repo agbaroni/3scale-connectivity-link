@@ -1,0 +1,13 @@
+{
+    "build": {
+        "dockerfile": "Containerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "redhat.ansible"
+            ]
+        }
+    },
+    "name": "3scale-connectivity-link"
+}

@@ -1,0 +1,23 @@
+---
+# BEFORE: oc run bootstrap-3scale-db --namespace=3scale --restart=Never --image=registry.redhat.io/3scale-amp2/system-rhel9:3scale2.16 --env="DATABASE_URL=mysql2://system:password@system-database.3scale-persistence.svc.cluster.local:3306/system" --env="RAILS_ENV=production" -- /bin/bash -c "bundle exec rake db:schema:load"
+apiVersion: apps.3scale.net/v1alpha1
+kind: APIManager
+metadata:
+  name: test
+  namespace: 3scale
+spec:
+  apicast:
+    productionSpec:
+      replicas: 0
+    stagingSpec:
+      replicas: 0
+  externalComponents:
+    backend:
+      redis: true
+    system:
+      redis: true
+      database: true
+    zync:
+      database: true
+  resourceRequirementsEnabled: false
+  wildcardDomain: apps.cluster-jsn9w.dynamic2.redhatworkshops.io
