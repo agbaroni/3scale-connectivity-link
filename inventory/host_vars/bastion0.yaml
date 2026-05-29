@@ -14,4 +14,10 @@ threescale:
 connectivity_link:
   cluster_issuer: test-ci-1
   gateway:
+    class_name: openshift-default
+    cluster_issuer: self-signed
+    domain: '*.gw1.apps.cluster-jsn9w.dynamic2.redhatworkshops.io'
     name: gw1
+    project:
+      display_name: api-gateway
+      name: api-gateway

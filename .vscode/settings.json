@@ -2,6 +2,10 @@
     "files.associations": {
         "main.yaml": "ansible",
         "usages.yaml": "ansible",
-        "templates/gateway.yaml.j2": "ansible-jinja"
+        "templates/cluster-issuer.yaml.j2": "ansible-jinja",
+        "templates/gateway.yaml.j2": "ansible-jinja",
+        "templates/gatewayclass.yaml.j2": "ansible-jinja",
+        "templates/project.yaml.j2": "ansible-jinja",
+        "templates/tlspolicy.yaml.j2": "ansible-jinja"
     }
 }

@@ -1,0 +1,6 @@
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  annotations:
+    openshift.io/display-name: "{{ connectivity_link.gateway.project.display_name }}"
+  name: {{ connectivity_link.gateway.project.name }}

@@ -8,9 +8,9 @@
 
 - name: "Retrieve Usage {{ service_id }}"
   ansible.builtin.uri:
-    url: "{{ threescale.hostname }}/admin/api/services/{{ service_id }}/backend_usages.json?{{ query_parametets | urlencode }}"
+    url: "{{ threescale.hostname }}/admin/api/services/{{ service_id }}/backend_usages.json?{{ query_parameters | urlencode }}"
   vars:
-    query_parametets:
+    query_parameters:
       access_token: "{{ threescale.access_token }}"
   register: output_usages
 
@@ -24,9 +24,9 @@
 
 - name: Get Backend URL
   ansible.builtin.uri:
-    url: "{{ usage[0] }}.json?{{ query_parametets | urlencode }}"
+    url: "{{ usage[0] }}.json?{{ query_parameters | urlencode }}"
   vars:
-    query_parametets:
+    query_parameters:
       access_token: "{{ threescale.access_token }}"
   register: output_backend
 
@@ -42,9 +42,9 @@
 
 - name: Get Application Plans
   ansible.builtin.uri:
-    url: "{{ item | community.general.json_query('service.links[?rel==`application_plans`].href') | first }}.json?{{ query_parametets | urlencode }}"
+    url: "{{ item | community.general.json_query('service.links[?rel==`application_plans`].href') | first }}.json?{{ query_parameters | urlencode }}"
   vars:
-    query_parametets:
+    query_parameters:
       access_token: "{{ threescale.access_token }}"
   register: output_app_plans
 
@@ -59,9 +59,9 @@
 
 - name: Get Limits
   ansible.builtin.uri:
-    url: "{{ threescale.hostname }}/admin/api/application_plans/{{ app_plan_id }}/limits.json?{{ query_parametets | urlencode }}"
+    url: "{{ threescale.hostname }}/admin/api/application_plans/{{ app_plan_id }}/limits.json?{{ query_parameters | urlencode }}"
   vars:
-    query_parametets:
+    query_parameters:
       access_token: "{{ threescale.access_token }}"
   register: output_app_plan_limits
   when: n_app_plans != 0
@@ -92,9 +92,9 @@
 
 - name: Get Applications
   ansible.builtin.uri:
-    url: "{{ threescale.hostname }}/admin/api/applications.json?{{ query_parametets | urlencode }}"
+    url: "{{ threescale.hostname }}/admin/api/applications.json?{{ query_parameters | urlencode }}"
   vars:
-    query_parametets:
+    query_parameters:
       access_token: "{{ threescale.access_token }}"
       plan_id: "{{ app_plan_id }}"
   register: output_apps
@@ -128,21 +128,42 @@
 
 - name: Get Proxy
   ansible.builtin.uri:
-    url: "{{ threescale.hostname }}/admin/api/services/{{ service_id }}/proxy.json?{{ query_parametets | urlencode }}"
+    url: "{{ threescale.hostname }}/admin/api/services/{{ service_id }}/proxy.json?{{ query_parameters | urlencode }}"
   vars:
-    query_parametets:
+    query_parameters:
       access_token: "{{ threescale.access_token }}"
   register: output_proxy
 
-- name: Save OIDC issuer
-  ansible.builtin.set_fact:
-    oidc_issuer: "{{ output_proxy.json | community.general.json_query('proxy.oidc_issuer_endpoint') }}"
+# - name: Save OIDC issuer
+#   ansible.builtin.set_fact:
+#     oidc_issuer: "{{ output_proxy.json.proxy.oidc_issuer_endpoint | default(none, true) }}"
+#   when: output_proxy.json.proxy.oidc_issuer_endpoint is defined
+
+# - name: Save OIDC issuer
+#   ansible.builtin.set_fact:
+#     oidc_issuer: null
+#   when: output_proxy.json.proxy.oidc_issuer_endpoint is not defined
 
 - name: Combine with other Usages
   ansible.builtin.set_fact:
     objects: >-
       {{ objects | combine({
         service_id: {
-          'oidc_issuer': oidc_issuer | regex_replace('(https?://)([^@]+@)', '\1')
+          'credentials': {
+            'oidc_issuer': output_proxy.json.proxy.oidc_issuer_endpoint | default(none, true) | regex_replace('(https?://)([^@]+@)', '\1')
+          }
         }}, recursive=True)
       }}
+  when: output_proxy.json.proxy.oidc_issuer_endpoint is defined
+
+- name: Combine with other Usages
+  ansible.builtin.set_fact:
+    objects: >-
+      {{ objects | combine({
+        service_id: {
+          'credentials': {
+            'oidc_issuer': null
+          }
+        }}, recursive=True)
+      }}
+  when: output_proxy.json.proxy.oidc_issuer_endpoint is not defined

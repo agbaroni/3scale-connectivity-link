@@ -1,23 +1,25 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: {{ gateway.name }}
-  namespace: {{ gateway.namespace }}
+  name: {{ connectivity_link.gateway.name }}
+  namespace: {{ connectivity_link.gateway.project.name }}
+  annotations:
+    networking.istio.io/service-type: ClusterIP
   labels:
     kuadrant.io/gateway: "true"
 spec:
-    gatewayClassName: openshift-default
-    listeners:
-    - allowedRoutes:
-        namespaces:
-          from: All 
-      hostname: "api.${KUADRANT_ZONE_ROOT_DOMAIN}"
-      name: api
-      port: 443
-      protocol: HTTPS
-      tls:
-        certificateRefs:
-        - group: ""
-          kind: Secret
-          name: api-{{ gateway.name }}-tls
-        mode: Terminate
+  gatewayClassName: {{ connectivity_link.gateway.class_name }}
+  listeners:
+  - name: api
+    hostname: "{{ connectivity_link.gateway.domain }}"
+    port: 443
+    protocol: HTTPS
+    allowedRoutes:
+      namespaces:
+        from: All
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - group: ""
+        kind: Secret
+        name: api-{{ connectivity_link.gateway.name }}-tls

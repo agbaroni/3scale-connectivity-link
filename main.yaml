@@ -8,15 +8,20 @@
 
     - name: Retrieve all Services
       ansible.builtin.uri:
-        url: "{{ threescale.hostname }}/admin/api/services.json?{{ query_parametets | urlencode }}"
+        url: "{{ threescale.hostname }}/admin/api/services.json?{{ query_parameters | urlencode }}"
       vars:
-        query_parametets:
+        query_parameters:
           access_token: "{{ threescale.access_token }}"
       register: output
 
     - name: Filter by Service ID
       ansible.builtin.set_fact:
-        services: "{{ output.json | community.general.json_query('services') }}"
+        orig_services: "{{ output.json | community.general.json_query('services') }}"
+
+    - name: Filter enabled Services
+      ansible.builtin.set_fact:
+        services: "{{ orig_services }}"
+      loop: "{{ orig_services }}"
 
     - name: Retrieve all Usages
       ansible.builtin.include_tasks:
@@ -25,4 +30,29 @@
 
     - name: Test
       ansible.builtin.debug:
-        var: objects
+        msg: "{{ objects | dict2items }}"
+
+    - name: Create Gateway Project
+      kubernetes.core.k8s:
+        definition: "{{ lookup('template', 'templates/project.yaml.j2') | from_yaml }}"
+        state: present
+
+    - name: Create GatewayClass instance
+      kubernetes.core.k8s:
+        definition: "{{ lookup('template', 'templates/gatewayclass.yaml.j2') | from_yaml }}"
+        state: present
+
+    - name: Create Gateway instance
+      kubernetes.core.k8s:
+        definition: "{{ lookup('template', 'templates/gateway.yaml.j2') | from_yaml }}"
+        state: present
+
+    - name: Create Cluter Issuer
+      kubernetes.core.k8s:
+        definition: "{{ lookup('template', 'templates/clusterissuer.yaml.j2') | from_yaml }}"
+        state: present
+
+    - name: Create TLS Policy
+      kubernetes.core.k8s:
+        definition: "{{ lookup('template', 'templates/tlspolicy.yaml.j2') | from_yaml }}"
+        state: present

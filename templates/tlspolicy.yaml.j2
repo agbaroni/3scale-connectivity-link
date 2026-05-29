@@ -1,0 +1,14 @@
+apiVersion: kuadrant.io/v1
+kind: TLSPolicy
+metadata:
+  name: {{ connectivity_link.gateway.name }}-tls
+  namespace: {{ connectivity_link.gateway.project.name }}
+spec:
+  targetRef:
+    name: {{ connectivity_link.gateway.name }}
+    group: gateway.networking.k8s.io
+    kind: Gateway
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: {{ connectivity_link.gateway.cluster_issuer }}
