@@ -18,10 +18,6 @@
       ansible.builtin.set_fact:
         services: "{{ output.json | community.general.json_query('services') }}"
 
-    # - name: Test
-    #   ansible.builtin.debug:
-    #     msg: "{{ services }}"
-
     - name: Retrieve all Usages
       ansible.builtin.include_tasks:
         file: usages.yaml
@@ -30,7 +26,3 @@
     - name: Test
       ansible.builtin.debug:
         var: objects
-
-    # - name: Test
-    #   ansible.builtin.debug:
-    #     msg: "{{ product_ids }}"

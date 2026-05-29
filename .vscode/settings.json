@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "main.yaml": "ansible",
+        "usages.yaml": "ansible",
+        "templates/gateway.yaml.j2": "ansible-jinja"
+    }
+}

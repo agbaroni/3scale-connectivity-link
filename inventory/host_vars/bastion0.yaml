@@ -4,7 +4,14 @@ ansible_python_interpreter: "{{ ansible_playbook_python }}"
 
 threescale:
   access_token: '21d026b7c231a295e1b31c6a278b962a982a66699eb38d0dd176f28db66e2981'
+  products:
+    - name: api
+      enabled: false
+    - name: pong
+      enabled: true
   hostname: https://3scale-admin.apps.cluster-jsn9w.dynamic2.redhatworkshops.io
 
 connectivity_link:
   cluster_issuer: test-ci-1
+  gateway:
+    name: gw1

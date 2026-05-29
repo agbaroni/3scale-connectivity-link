@@ -32,4 +32,117 @@
 
 - name: Combine with other Usages
   ansible.builtin.set_fact:
-    objects: "{{ objects | combine({service_id: { 'name': service_name, 'endpoint': output_backend.json | community.general.json_query('backend_api.private_endpoint') }}) }}"
+    objects: >-
+      {{ objects | combine({
+        service_id: {
+          'name': service_name,
+          'endpoint': output_backend.json | community.general.json_query('backend_api.private_endpoint')
+        }}, recursive=True)
+      }}
+
+- name: Get Application Plans
+  ansible.builtin.uri:
+    url: "{{ item | community.general.json_query('service.links[?rel==`application_plans`].href') | first }}.json?{{ query_parametets | urlencode }}"
+  vars:
+    query_parametets:
+      access_token: "{{ threescale.access_token }}"
+  register: output_app_plans
+
+- name: Check the number of Plans
+  ansible.builtin.set_fact:
+    n_app_plans: "{{ output_app_plans.json.plans | length }}"
+
+- name: Get active Application Plan
+  ansible.builtin.set_fact:
+    app_plan_id: "{{ output_app_plans.json.plans | first | community.general.json_query('application_plan.id') }}"
+  when: n_app_plans != 0
+
+- name: Get Limits
+  ansible.builtin.uri:
+    url: "{{ threescale.hostname }}/admin/api/application_plans/{{ app_plan_id }}/limits.json?{{ query_parametets | urlencode }}"
+  vars:
+    query_parametets:
+      access_token: "{{ threescale.access_token }}"
+  register: output_app_plan_limits
+  when: n_app_plans != 0
+
+- name: Check the number of Limits
+  ansible.builtin.set_fact:
+    n_app_plan_limits: "{{ output_app_plan_limits.json.limits | length }}"
+  when: n_app_plans != 0
+
+- name: Save limit coordinates
+  ansible.builtin.set_fact:
+    app_plan_period: "{{ output_app_plan_limits.json.limits | first | community.general.json_query('limit.period') }}"
+    app_plan_value: "{{ output_app_plan_limits.json.limits | first | community.general.json_query('limit.value') }}"
+  when: (n_app_plans != 0) and (n_app_plan_limits != 0)
+
+- name: Combine with other Usages
+  ansible.builtin.set_fact:
+    objects: >-
+      {{ objects | combine({
+        service_id: {
+          'limits': {
+            'period': app_plan_period,
+            'value': app_plan_value
+          }
+        }}, recursive=True)
+      }}
+  when: (n_app_plans != 0) and (n_app_plan_limits != 0)
+
+- name: Get Applications
+  ansible.builtin.uri:
+    url: "{{ threescale.hostname }}/admin/api/applications.json?{{ query_parametets | urlencode }}"
+  vars:
+    query_parametets:
+      access_token: "{{ threescale.access_token }}"
+      plan_id: "{{ app_plan_id }}"
+  register: output_apps
+  when: n_app_plans != 0
+
+- name: Check the number of Applications
+  ansible.builtin.set_fact:
+    n_apps: "{{ output_apps.json.applications | length }}"
+  when: n_app_plans != 0
+
+- name: Save credentials
+  ansible.builtin.set_fact:
+    app_user_key: "{{ output_apps.json.applications | first | community.general.json_query('application.user_key') }}"
+    app_client_id: "{{ output_apps.json.applications | first | community.general.json_query('application.client_id') }}"
+    app_client_secret: "{{ output_apps.json.applications | first | community.general.json_query('application.client_secret') }}"
+  when: (n_app_plans != 0) and (n_apps != 0)
+
+- name: Combine with other Usages
+  ansible.builtin.set_fact:
+    objects: >-
+      {{ objects | combine({
+        service_id: {
+          'credentials': {
+            'user_key': app_user_key,
+            'client_id': app_client_id,
+            'client_secret': app_client_secret
+          }
+        }}, recursive=True)
+      }}
+  when: (n_app_plans != 0) and (n_apps != 0)
+
+- name: Get Proxy
+  ansible.builtin.uri:
+    url: "{{ threescale.hostname }}/admin/api/services/{{ service_id }}/proxy.json?{{ query_parametets | urlencode }}"
+  vars:
+    query_parametets:
+      access_token: "{{ threescale.access_token }}"
+  register: output_proxy
+
+- name: Save OIDC issuer
+  ansible.builtin.set_fact:
+    oidc_issuer: "{{ output_proxy.json | community.general.json_query('proxy.oidc_issuer_endpoint') }}"
+
+- name: Combine with other Usages
+  ansible.builtin.set_fact:
+    objects: >-
+      {{ objects | combine({
+        service_id: {
+          'oidc_issuer': oidc_issuer | regex_replace('(https?://)([^@]+@)', '\1')
+        }}, recursive=True)
+      }}
