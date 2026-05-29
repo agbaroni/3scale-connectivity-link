@@ -1,0 +1,35 @@
+- name: Extract Service ID
+  ansible.builtin.set_fact:
+    service_id: "{{ item.service.id }}"
+
+- name: Extract Service System name
+  ansible.builtin.set_fact:
+    service_name: "{{ item.service.system_name }}"
+
+- name: "Retrieve Usage {{ service_id }}"
+  ansible.builtin.uri:
+    url: "{{ threescale.hostname }}/admin/api/services/{{ service_id }}/backend_usages.json?{{ query_parametets | urlencode }}"
+  vars:
+    query_parametets:
+      access_token: "{{ threescale.access_token }}"
+  register: output_usages
+
+- name: Extract Usage info
+  ansible.builtin.set_fact:
+    usage: "{{ output_usages.json | first | community.general.json_query('backend_usage.links[?rel==`backend_api`].href') }}"
+
+- name: Test
+  ansible.builtin.debug:
+    var: usage
+
+- name: Get Backend URL
+  ansible.builtin.uri:
+    url: "{{ usage[0] }}.json?{{ query_parametets | urlencode }}"
+  vars:
+    query_parametets:
+      access_token: "{{ threescale.access_token }}"
+  register: output_backend
+
+- name: Combine with other Usages
+  ansible.builtin.set_fact:
+    objects: "{{ objects | combine({service_id: { 'name': service_name, 'endpoint': output_backend.json | community.general.json_query('backend_api.private_endpoint') }}) }}"

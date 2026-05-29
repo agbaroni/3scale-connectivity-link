@@ -1,0 +1,18 @@
+# https://github.com/Kuadrant/architecture/blob/main/rfcs/0002-well-known-attributes.md
+apiVersion: kuadrant.io/v1
+kind: RateLimitPolicy
+metadata:
+  name: pong
+  namespace: api-gateway
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: gw1
+  limits:
+    hits:
+      rates:
+        - limit: 5
+          window: 1m
+      when:
+        - predicate: request.method == "GET"

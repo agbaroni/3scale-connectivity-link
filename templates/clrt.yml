@@ -1,0 +1,20 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: pong
+  namespace: tests
+spec:
+  parentRefs:
+  - name: ingress-gateway
+    namespace: openshift-ingress
+  hostnames:
+  - "api.gwapi.apps.cluster-jsn9w.dynamic2.redhatworkshops.io"
+  rules:
+  - matches:
+    - method: GET
+      path:
+        type: PathPrefix
+        value: "/"
+    backendRefs:
+    - name: pong
+      port: 8080

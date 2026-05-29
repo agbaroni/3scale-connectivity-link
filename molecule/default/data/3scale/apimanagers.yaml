@@ -1,5 +1,7 @@
 ---
-# BEFORE: oc run bootstrap-3scale-db --namespace=3scale --restart=Never --image=registry.redhat.io/3scale-amp2/system-rhel9:3scale2.16 --env="DATABASE_URL=mysql2://system:password@system-database.3scale-persistence.svc.cluster.local:3306/system" --env="RAILS_ENV=production" -- /bin/bash -c "bundle exec rake db:schema:load"
+# BEFORE:
+# 1) oc run bootstrap-3scale-db --namespace=3scale --restart=Never --image=registry.redhat.io/3scale-amp2/system-rhel9:3scale2.16 --env="DATABASE_URL=mysql2://system:password@system-database.3scale-persistence.svc.cluster.local:3306/system" --env="RAILS_ENV=production" -- /bin/bash -c "bundle exec rake db:schema:load"
+# 2) oc run bootstrap-3scale-db --namespace=3scale --restart=Never --image=registry.redhat.io/3scale-amp2/system-rhel9:3scale2.16 --env="DATABASE_URL=mysql2://system:password@system-database.3scale-persistence.svc.cluster.local:3306/system" --env="REDIS_URL=redis://backend-queues-redis.3scale-persistence.svc.cluster.local:6379/0" --env="SYSTEM_REDIS_URL=redis://system-redis.3scale-persistence.svc.cluster.local:6379/0" --env="RAILS_ENV=production" -- /bin/bash -c "bundle exec rake db:seed"
 apiVersion: apps.3scale.net/v1alpha1
 kind: APIManager
 metadata:
@@ -7,10 +9,11 @@ metadata:
   namespace: 3scale
 spec:
   apicast:
-    productionSpec:
-      replicas: 0
     stagingSpec:
-      replicas: 0
+      customEnvironments:
+        - secretRef:
+            name: apicast-staging-custom-environment
+      logLevel: debug
   externalComponents:
     backend:
       redis: true
@@ -20,4 +23,27 @@ spec:
     zync:
       database: true
   resourceRequirementsEnabled: false
+  system:
+    fileStorage:
+      persistentVolumeClaim:
+        storageClassName: ocs-external-storagecluster-cephfs
   wildcardDomain: apps.cluster-jsn9w.dynamic2.redhatworkshops.io
+# AFTER
+# 1) oc exec -it system-app-fdddc75d6-74kss -n 3scale -c system-master -- bundle exec rails console
+#        User.all.each do |u|
+#          u.password = 'NIBd2MnO'
+#          u.password_confirmation = 'NIBd2MnO'
+#          u.save!(validate: false)
+#        end
+# 2) oc rsh -n 3scale-persistence deployment/system-database
+#    UPDATE accounts 
+#    SET domain = 'master.apps.cluster-jsn9w.dynamic2.redhatworkshops.io', 
+#      self_domain = 'master.apps.cluster-jsn9w.dynamic2.redhatworkshops.io' 
+#    WHERE id = 2;
+#    UPDATE accounts 
+#    SET domain = '3scale.apps.cluster-jsn9w.dynamic2.redhatworkshops.io', 
+#      self_domain = '3scale-admin.apps.cluster-jsn9w.dynamic2.redhatworkshops.io' 
+#    WHERE id = 3;
+# 3)  oc create route edge 3scale-provider --service=system-developer --port=http --hostname=3scale-admin.apps.cluster-jsn9w.dynamic2.redhatworkshops.io --namespace=3scale
+# 4) oc create route edge 3scale-master --service=system-master --port=http --hostname=master.apps.cluster-jsn9w.dynamic2.redhatworkshops.io --namespace=3scale
+# Enter in Incognito

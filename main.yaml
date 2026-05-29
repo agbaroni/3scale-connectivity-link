@@ -2,6 +2,35 @@
 - name: Start migration
   hosts: bastions
   tasks:
+    - name: Create the Objects store
+      ansible.builtin.set_fact:
+        objects: {}
+
+    - name: Retrieve all Services
+      ansible.builtin.uri:
+        url: "{{ threescale.hostname }}/admin/api/services.json?{{ query_parametets | urlencode }}"
+      vars:
+        query_parametets:
+          access_token: "{{ threescale.access_token }}"
+      register: output
+
+    - name: Filter by Service ID
+      ansible.builtin.set_fact:
+        services: "{{ output.json | community.general.json_query('services') }}"
+
+    # - name: Test
+    #   ansible.builtin.debug:
+    #     msg: "{{ services }}"
+
+    - name: Retrieve all Usages
+      ansible.builtin.include_tasks:
+        file: usages.yaml
+      loop: "{{ services }}"
+
     - name: Test
       ansible.builtin.debug:
-        msg: ciao
+        var: objects
+
+    # - name: Test
+    #   ansible.builtin.debug:
+    #     msg: "{{ product_ids }}"

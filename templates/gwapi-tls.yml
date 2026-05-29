@@ -1,0 +1,16 @@
+kind: Certificate
+apiVersion: cert-manager.io/v1
+metadata:
+  name: gwapi
+  namespace: openshift-ingress
+spec:
+  commonName: '*.gwapi.apps.cluster-jsn9w.dynamic2.redhatworkshops.io'
+  isCA: false
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: test-ci-1
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  secretName: gwapi

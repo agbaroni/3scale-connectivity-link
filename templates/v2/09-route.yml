@@ -1,0 +1,15 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: pong
+  namespace: api-gateway
+spec:
+  host: pong.gw1.apps.cluster-jsn9w.dynamic2.redhatworkshops.io
+  to:
+    kind: Service
+    name: gw1-openshift-default
+  port:
+    targetPort: api
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: Redirect

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-kuadrant-config
+  namespace: kuadrant-coredns
+data:
+  Corefile: |
+    gw.apps.cluster-jsn9w.dynamic2.redhatworkshops.io:53 {
+        errors
+        health {
+            lameduck 5s
+        }
+        ready
+        log
+        metadata
+        kuadrant
+    }
+# AFTER: oc -n kuadrant-coredns patch deployment kuadrant-coredns   --patch '{"spec":{"template":{"spec":{"volumes":[{"name":"config-volume","configMap":{"name":"coredns-kuadrant-config","items":[{"key":"Corefile","path":"Corefile"}]}}]}}}}'
