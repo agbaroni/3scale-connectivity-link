@@ -1,11 +1,12 @@
 {
     "files.associations": {
+        "filter.yaml": "ansible",
         "main.yaml": "ansible",
         "usages.yaml": "ansible",
-        "templates/cluster-issuer.yaml.j2": "ansible-jinja",
-        "templates/gateway.yaml.j2": "ansible-jinja",
-        "templates/gatewayclass.yaml.j2": "ansible-jinja",
-        "templates/project.yaml.j2": "ansible-jinja",
-        "templates/tlspolicy.yaml.j2": "ansible-jinja"
+        "templates/cluster-issuer.yaml.j2": "jinja-yaml",
+        "templates/gateway.yaml.j2": "jinja-yaml",
+        "templates/gatewayclass.yaml.j2": "jinja-yaml",
+        "templates/project.yaml.j2": "jinja-yaml",
+        "templates/tlspolicy.yaml.j2": "jinja-yaml"
     }
 }

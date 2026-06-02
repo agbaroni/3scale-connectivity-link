@@ -30,7 +30,12 @@
 
     - name: Test
       ansible.builtin.debug:
-        msg: "{{ objects | dict2items }}"
+        msg: "{{ objects }}"
+
+    - name: Filter enabled apis
+      ansible.builtin.include_tasks:
+        file: filter.yaml
+      loop: "{{ objects | dict2items }}"
 
     - name: Create Gateway Project
       kubernetes.core.k8s:
@@ -56,3 +61,6 @@
       kubernetes.core.k8s:
         definition: "{{ lookup('template', 'templates/tlspolicy.yaml.j2') | from_yaml }}"
         state: present
+
+    # - name: foo
+    #   loop: "{{ objects }}"

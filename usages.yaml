@@ -18,9 +18,9 @@
   ansible.builtin.set_fact:
     usage: "{{ output_usages.json | first | community.general.json_query('backend_usage.links[?rel==`backend_api`].href') }}"
 
-- name: Test
-  ansible.builtin.debug:
-    var: usage
+# - name: Test
+#   ansible.builtin.debug:
+#     var: usage
 
 - name: Get Backend URL
   ansible.builtin.uri:
@@ -134,10 +134,16 @@
       access_token: "{{ threescale.access_token }}"
   register: output_proxy
 
+# - ansible.builtin.debug:
+#     var: output_proxy
+
 # - name: Save OIDC issuer
 #   ansible.builtin.set_fact:
 #     oidc_issuer: "{{ output_proxy.json.proxy.oidc_issuer_endpoint | default(none, true) }}"
 #   when: output_proxy.json.proxy.oidc_issuer_endpoint is defined
+
+# - ansible.builtin.debug:
+#     var: oidc_issuer
 
 # - name: Save OIDC issuer
 #   ansible.builtin.set_fact:
@@ -150,7 +156,7 @@
       {{ objects | combine({
         service_id: {
           'credentials': {
-            'oidc_issuer': output_proxy.json.proxy.oidc_issuer_endpoint | default(none, true) | regex_replace('(https?://)([^@]+@)', '\1')
+            'oidc_issuer': output_proxy.json.proxy.oidc_issuer_endpoint | regex_replace('(https?://)([^@]+@)', '\1')
           }
         }}, recursive=True)
       }}
@@ -162,7 +168,7 @@
       {{ objects | combine({
         service_id: {
           'credentials': {
-            'oidc_issuer': null
+            'oidc_issuer': none
           }
         }}, recursive=True)
       }}
