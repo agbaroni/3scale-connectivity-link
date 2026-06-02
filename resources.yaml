@@ -1,0 +1,34 @@
+- name: "Create HTTPRoute {{ object.value.name  }}"
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'templates/httproute.yaml.j2') | from_yaml }}"
+    state: present
+  when: object.value.enabled
+
+# - name: Zzzz
+#   ansible.builtin.debug:
+#     msg: "{{ lookup('template', 'templates/authpolicy.yaml.j2') }}"
+#   when: object.value.enabled
+
+- name: "Create AuthPolicy (OIDC) {{ object.value.name  }}"
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'templates/authpolicy_oidc.yaml.j2') | from_yaml }}"
+    state: present
+  when: object.value.enabled and (object.value.credentials.oidc_issuer is not none)
+
+- name: "Create AuthPolicy (user_key) {{ object.value.name  }}"
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'templates/authpolicy_user_key.yaml.j2') | from_yaml }}"
+    state: present
+  when: object.value.enabled and (object.value.credentials.user_key is not none)
+
+- name: "Create Secret (user_key) {{ object.value.name  }}"
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'templates/secret.yaml.j2') | from_yaml }}"
+    state: present
+  when: object.value.enabled and (object.value.credentials.user_key is not none)
+
+- name: "Create RateLimitPolicy {{ object.value.name  }}"
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'templates/ratelimitpolicy.yaml.j2') | from_yaml }}"
+    state: present
+  when: object.value.enabled and (object.value.limits is defined)

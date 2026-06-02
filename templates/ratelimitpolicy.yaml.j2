@@ -1,0 +1,17 @@
+apiVersion: kuadrant.io/v1
+kind: RateLimitPolicy
+metadata:
+  name: {{ object.value.name }}
+  namespace: {{ object.value.project }}
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: {{ object.value.name }}
+  limits:
+    hits:
+      rates:
+        - limit: {{ object.value.limits.value }}
+          window: {{ object.value.limits.period }}
+      when:
+        - predicate: request.method == "GET"

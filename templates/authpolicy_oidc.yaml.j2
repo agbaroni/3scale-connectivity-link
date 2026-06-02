@@ -1,18 +1,18 @@
 apiVersion: kuadrant.io/v1
 kind: AuthPolicy
 metadata:
-  name: pong-auth
-  namespace: tests
+  name: {{ object.value.name }}
+  namespace: {{ object.value.project }}
 spec:
   targetRef:
     group: gateway.networking.k8s.io
     kind: HTTPRoute
-    name: pong
+    name: {{ object.value.name }}
   rules:
     authentication:
       jwt-keycloak:
         jwt:
-          issuerUrl: https://sso.apps.cluster-jsn9w.dynamic2.redhatworkshops.io/realms/gws
+          issuerUrl: "{{ object.value.credentials.oidc_issuer }}"
     response:
       unauthorized:
         headers:

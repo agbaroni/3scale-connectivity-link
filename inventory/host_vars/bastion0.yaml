@@ -3,12 +3,14 @@ ansible_host: localhost
 ansible_python_interpreter: "{{ ansible_playbook_python }}"
 
 threescale:
-  # access_token: ''
+  access_token: ''
   products:
     - name: api
       enabled: false
     - name: pong
       enabled: true
+      service:
+        name: pong
   hostname: https://3scale-admin.apps.cluster-jsn9w.dynamic2.redhatworkshops.io
 
 connectivity_link:
@@ -16,8 +18,14 @@ connectivity_link:
   gateway:
     class_name: openshift-default
     cluster_issuer: self-signed
-    domain: '*.gw1.apps.cluster-jsn9w.dynamic2.redhatworkshops.io'
+    domain:
+      base: 'gw1.apps.cluster-jsn9w.dynamic2.redhatworkshops.io'
     name: gw1
     project:
       display_name: api-gateway
       name: api-gateway
+  apis:
+    - name: pong
+      project: tests
+    - name: pong2
+      project: tests

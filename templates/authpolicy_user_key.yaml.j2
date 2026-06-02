@@ -1,0 +1,31 @@
+apiVersion: kuadrant.io/v1
+kind: AuthPolicy
+metadata:
+  name: {{ object.value.name }}
+  namespace: {{ object.value.project }}
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: {{ object.value.name }}
+  rules:
+    authentication:
+      simple-user-key:
+        apiKey:
+          selector:
+            matchLabels:
+              api_product: {{ object.value.name }}
+        credentials:
+          queryString:
+            name: user_key
+    response:
+      unauthorized:
+        headers:
+          "content-type":
+            value: application/json
+        body:
+          value: |
+            {"error": "Unauthorized", "message": "Valid JWT Bearer token required"}
+# TEST:
+# 1) TOKEN=$(curl -sk -X POST   https://sso.apps.cluster-jsn9w.dynamic2.redhatworkshops.io/realms/gws/protocol/openid-connect/token   -H "Content-Type: application/x-www-form-urlencoded"   -d "grant_type=client_credentials"   -d "client_id=gw1"   -d "client_secret=xvydxW9wodsgM59RyBkMhrC4VSG1Vy5I" | jq -r '.access_token')
+# 2) curl -Ik -H "Authorization: Bearer $TOKEN" https://pong.gw1.apps.cluster-jsn9w.dynamic2.redhatworkshops.io/

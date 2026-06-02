@@ -11,7 +11,7 @@ spec:
   gatewayClassName: {{ connectivity_link.gateway.class_name }}
   listeners:
   - name: api
-    hostname: "{{ connectivity_link.gateway.domain }}"
+    hostname: "*.{{ connectivity_link.gateway.domain.base }}"
     port: 443
     protocol: HTTPS
     allowedRoutes:

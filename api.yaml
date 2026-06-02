@@ -1,0 +1,9 @@
+- name: Yyyy
+  ansible.builtin.set_fact:
+    objects: >-
+      {{ objects | combine({
+        object.key: {
+          'project': api.project | default(connectivity_link.gateway.project.name)
+        }}, recursive=True)
+      }}
+  when: object.value.name == api.name

@@ -1,0 +1,13 @@
+- name: "Verify {{ object.value.name }}"
+  ansible.builtin.include_tasks:
+    file: product.yaml
+  loop: "{{ threescale.products }}"
+  loop_control:
+    loop_var: product
+
+- name: "Verify {{ object.value.name }}"
+  ansible.builtin.include_tasks:
+    file: api.yaml
+  loop: "{{ connectivity_link.apis }}"
+  loop_control:
+    loop_var: api

@@ -1,12 +1,18 @@
 {
     "files.associations": {
+        "api.yaml": "ansible",
         "filter.yaml": "ansible",
         "main.yaml": "ansible",
+        "product.yaml": "ansible",
+        "resources.yaml": "ansible",
         "usages.yaml": "ansible",
         "templates/cluster-issuer.yaml.j2": "jinja-yaml",
         "templates/gateway.yaml.j2": "jinja-yaml",
         "templates/gatewayclass.yaml.j2": "jinja-yaml",
+        "templates/httproute.yaml.j2": "jinja-yaml",
         "templates/project.yaml.j2": "jinja-yaml",
+        "templates/ratelimitpolicy.yaml.j2": "jinja-yaml",
+        "templates/secret.yaml.j2": "jinja-yaml",
         "templates/tlspolicy.yaml.j2": "jinja-yaml"
     }
 }

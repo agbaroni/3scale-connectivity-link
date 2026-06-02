@@ -35,6 +35,7 @@
     objects: >-
       {{ objects | combine({
         service_id: {
+          'enabled': false,
           'name': service_name,
           'endpoint': output_backend.json | community.general.json_query('backend_api.private_endpoint')
         }}, recursive=True)
@@ -83,7 +84,7 @@
       {{ objects | combine({
         service_id: {
           'limits': {
-            'period': app_plan_period,
+            'period': period_mapping[app_plan_period],
             'value': app_plan_value
           }
         }}, recursive=True)
