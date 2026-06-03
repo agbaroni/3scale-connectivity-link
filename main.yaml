@@ -9,6 +9,7 @@
     - name: Retrieve all Services
       ansible.builtin.uri:
         url: "{{ threescale.hostname }}/admin/api/services.json?{{ query_parameters | urlencode }}"
+        validate_certs: "{{ threescale.validate_certs }}"
       vars:
         query_parameters:
           access_token: "{{ threescale.access_token }}"
