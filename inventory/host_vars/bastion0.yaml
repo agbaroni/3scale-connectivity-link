@@ -10,7 +10,8 @@ threescale:
     - name: pong
       enabled: true
       service:
-        hostname: pong
+        name: pong
+        hostname: pong.tests.svc.cluster.local
         port: 8080
   hostname: https://3scale-admin.apps.cluster-jsn9w.dynamic2.redhatworkshops.io
   validate_certs: false

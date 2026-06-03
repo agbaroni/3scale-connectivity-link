@@ -4,11 +4,6 @@
     state: present
   when: object.value.enabled
 
-# - name: Zzzz
-#   ansible.builtin.debug:
-#     msg: "{{ lookup('template', 'templates/authpolicy.yaml.j2') }}"
-#   when: object.value.enabled
-
 - name: "Create AuthPolicy (OIDC) {{ object.value.name  }}"
   kubernetes.core.k8s:
     definition: "{{ lookup('template', 'templates/authpolicy_oidc.yaml.j2') | from_yaml }}"

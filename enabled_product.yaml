@@ -1,0 +1,10 @@
+- name: Filter enabled Product
+  ansible.builtin.set_fact:
+    objects: >-
+      {{ objects | combine({
+        object.key: {
+          'enabled': product.enabled | default(true),
+          'service': product.service | default(none)
+        }}, recursive=True)
+      }}
+  when: object.value.name == product.name

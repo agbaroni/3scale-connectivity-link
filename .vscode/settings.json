@@ -2,6 +2,7 @@
     "files.associations": {
         "api.yaml": "ansible",
         "filter_apis.yaml": "ansible",
+        "enabled_product.yaml": "ansible",
         "filter_services.yaml": "ansible",
         "main.yaml": "ansible",
         "product.yaml": "ansible",
