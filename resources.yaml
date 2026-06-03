@@ -4,6 +4,12 @@
     state: present
   when: object.value.enabled
 
+- name: "Create Route {{ object.value.name  }}"
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'templates/route.yaml.j2') | from_yaml }}"
+    state: present
+  when: object.value.enabled
+
 - name: "Create AuthPolicy (OIDC) {{ object.value.name  }}"
   kubernetes.core.k8s:
     definition: "{{ lookup('template', 'templates/authpolicy_oidc.yaml.j2') | from_yaml }}"

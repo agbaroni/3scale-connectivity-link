@@ -14,6 +14,7 @@
         "templates/httproute.yaml.j2": "jinja-yaml",
         "templates/project.yaml.j2": "jinja-yaml",
         "templates/ratelimitpolicy.yaml.j2": "jinja-yaml",
+        "templates/route.yaml.j2": "jinja-yaml",
         "templates/secret.yaml.j2": "jinja-yaml",
         "templates/tlspolicy.yaml.j2": "jinja-yaml"
     }

@@ -1,0 +1,15 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ object.value.name }}
+  namespace: {{ object.value.project }}
+spec:
+  host: "{{ object.value.name }}.{{ connectivity_link.gateway.domain.base }}"
+  to:
+    kind: Service
+    name: "{{ connectivity_link.gateway.name }}-{{ connectivity_link.gateway.class_name }}"
+  port:
+    targetPort: api
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: Redirect
