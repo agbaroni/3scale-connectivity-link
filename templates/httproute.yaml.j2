@@ -17,5 +17,5 @@ spec:
         type: PathPrefix
         value: /
     backendRefs:
-    - name: {{ object.value.service.name }}
-      port: 8080
+    - name: {{ object.value.service.hostname }}
+      port: {{ object.value.service.port }}

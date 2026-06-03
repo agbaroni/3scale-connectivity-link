@@ -10,7 +10,8 @@ threescale:
     - name: pong
       enabled: true
       service:
-        name: pong
+        hostname: pong
+        port: 8080
   hostname: https://3scale-admin.apps.cluster-jsn9w.dynamic2.redhatworkshops.io
 
 connectivity_link:
