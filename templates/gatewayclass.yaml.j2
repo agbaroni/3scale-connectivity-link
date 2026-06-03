@@ -2,4 +2,5 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: GatewayClass
 metadata:
   name: {{ connectivity_link.gateway.class_name }}
-spec: {}
+spec:
+  controllerName: openshift.io/gateway-controller
