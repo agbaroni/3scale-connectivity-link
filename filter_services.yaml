@@ -1,0 +1,6 @@
+- name: "Filter Product {{ item.service.system_name }}"
+  ansible.builtin.include_tasks:
+    file: product.yaml
+  loop: "{{ threescale.products }}"
+  loop_control:
+    loop_var: product

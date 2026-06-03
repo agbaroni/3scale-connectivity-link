@@ -1,4 +1,4 @@
-- name: Yyyy
+- name: Filter API
   ansible.builtin.set_fact:
     objects: >-
       {{ objects | combine({
