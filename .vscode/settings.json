@@ -5,6 +5,7 @@
         "enabled_product.yaml": "ansible",
         "filter_services.yaml": "ansible",
         "main.yaml": "ansible",
+        "policy.yaml": "ansible",
         "product.yaml": "ansible",
         "resources.yaml": "ansible",
         "usages.yaml": "ansible",

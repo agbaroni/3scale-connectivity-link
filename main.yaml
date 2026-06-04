@@ -30,6 +30,9 @@
         file: usages.yaml
       loop: "{{ filtered_services }}"
 
+    - debug:
+        var: objects
+
     - name: Further reduction of the set of Products to be migrated
       ansible.builtin.include_tasks:
         file: filter_apis.yaml

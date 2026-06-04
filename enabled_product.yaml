@@ -4,7 +4,8 @@
       {{ objects | combine({
         object.key: {
           'enabled': product.enabled | default(true),
-          'service': product.service | default(none)
+          'service': product.service | default(none),
+          'introspection': product.introspection | default(none)
         }}, recursive=True)
       }}
   when: object.value.name == product.name

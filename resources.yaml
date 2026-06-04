@@ -14,7 +14,13 @@
   kubernetes.core.k8s:
     definition: "{{ lookup('template', 'templates/authpolicy_oidc.yaml.j2') | from_yaml }}"
     state: present
-  when: object.value.enabled and (object.value.credentials.oidc_issuer is not none)
+  when: (not object.value.introspection) and object.value.enabled and (object.value.credentials.oidc_issuer is not none)
+
+- name: "Create AuthPolicy (OIDC - Introspected) {{ object.value.name  }}"
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'templates/authpolicy_oidc.yaml.j2') | from_yaml }}"
+    state: present
+  when: (object.value.introspection) and object.value.enabled and (object.value.credentials.oidc_issuer is not none)
 
 - name: "Create AuthPolicy (user_key) {{ object.value.name  }}"
   kubernetes.core.k8s:

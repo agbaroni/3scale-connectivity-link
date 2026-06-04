@@ -4,11 +4,16 @@ ansible_python_interpreter: "{{ ansible_playbook_python }}"
 
 threescale:
   access_token: ''
+  introspection_policy:
+    name: jwt_parser
   products:
     - name: api
       enabled: false
     - name: pong
       enabled: true
+    - name: pong2
+      enabled: true
+      introspection: true
       service:
         name: pong
         hostname: pong.tests.svc.cluster.local
@@ -32,3 +37,8 @@ connectivity_link:
       project: tests
     - name: pong2
       project: tests
+# url: 'https://sso.apps.cluster-jsn9w.dynamic2.redhatworkshops.io/realms/gws'
+# headers:
+#   - name: Hdr1
+#     op: add
+#     value: h1

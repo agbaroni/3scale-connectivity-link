@@ -1,0 +1,9 @@
+- name: Get Policy config
+  ansible.builtin.set_fact:
+    objects: >-
+      {{ objects | combine({
+        service_id: {
+          'introspection_policy_config': policy.configuration
+        }}, recursive=True)
+      }}
+  when: policy.name == threescale.introspection_policy.name

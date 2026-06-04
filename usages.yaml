@@ -160,3 +160,19 @@
         }}, recursive=True)
       }}
   when: output_proxy.json.proxy.oidc_issuer_endpoint is not defined
+
+- name: Get policies config
+  ansible.builtin.uri:
+    url: "{{ threescale.hostname }}/admin/api/services/{{ service_id }}/proxy/policies.json?{{ query_parameters | urlencode }}"
+    validate_certs: "{{ threescale.validate_certs }}"
+  vars:
+    query_parameters:
+      access_token: "{{ threescale.access_token }}"
+  register: output_policies
+
+- name: Get Intro config
+  ansible.builtin.include_tasks:
+    file: policy.yaml
+  loop: "{{ output_policies.json.policies_config }}"
+  loop_control:
+    loop_var: policy
