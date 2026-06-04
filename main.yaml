@@ -1,13 +1,13 @@
 ---
-- name: Migrating 3scale to Connectivity Link
+- name: Migrating 3scale configurations to Connectivity Link specifics
   hosts: bastions
   tasks:
-    - name: Create the Objects store
+    - name: Creation of the data store for collecting relevant information
       ansible.builtin.set_fact:
         objects: {}
         filtered_services: []
 
-    - name: Retrieve all Services
+    - name: Retrieve the list of all Products on 3scale
       ansible.builtin.uri:
         url: "{{ threescale.hostname }}/admin/api/services.json?{{ query_parameters | urlencode }}"
         validate_certs: "{{ threescale.validate_certs }}"
@@ -16,66 +16,48 @@
           access_token: "{{ threescale.access_token }}"
       register: output
 
-    - name: Filter by Service ID
+    - name: Cleaning up the information within the set of Products retrieved from 3scale
       ansible.builtin.set_fact:
         services: "{{ output.json | community.general.json_query('services') }}"
 
-    - name: Filter enabled services
+    - name: Excluding Products not specified in the execution configuration
       ansible.builtin.include_tasks:
         file: filter_services.yaml
       loop: "{{ services }}"
 
-    # - name: Filter by Service ID
-    #   ansible.builtin.set_fact:
-    #     orig_services: "{{ output.json | community.general.json_query('services') }}"
-
-    # - name: Filter enabled Services
-    #   ansible.builtin.set_fact:
-    #     services: "{{ orig_services }}"
-    #   loop: "{{ orig_services }}"
-
-    - name: Retrieve all Usages
+    - name: Retrieving detailed information for each Product
       ansible.builtin.include_tasks:
         file: usages.yaml
       loop: "{{ filtered_services }}"
 
-    - name: Filter enabled services
+    - name: Further reduction of the set of Products to be migrated
       ansible.builtin.include_tasks:
         file: filter_apis.yaml
       loop: "{{ objects | dict2items }}"
       loop_control:
         loop_var: object
 
-    - name: Test
-      ansible.builtin.debug:
-        msg: "{{ objects }}"
-
-    - name: Create Gateway Project
+    - name: Creation of the Project where the Gateway type instance will be created
       kubernetes.core.k8s:
         definition: "{{ lookup('template', 'templates/project.yaml.j2') | from_yaml }}"
         state: present
 
-    # - name: Create GatewayClass instance
-    #   kubernetes.core.k8s:
-    #     definition: "{{ lookup('template', 'templates/gatewayclass.yaml.j2') | from_yaml }}"
-    #     state: present
-
-    - name: Create Gateway instance
+    - name: Creation of the Gateway type instance
       kubernetes.core.k8s:
         definition: "{{ lookup('template', 'templates/gateway.yaml.j2') | from_yaml }}"
         state: present
 
-    - name: Create Cluter Issuer
+    - name: Creation of the ClusterIssuer type instance to subsequently issue the necessary certificates
       kubernetes.core.k8s:
         definition: "{{ lookup('template', 'templates/clusterissuer.yaml.j2') | from_yaml }}"
         state: present
 
-    - name: Create TLS Policy
+    - name: Creation of the TLSPolicy type instance to be associated with the Gateway type instance
       kubernetes.core.k8s:
         definition: "{{ lookup('template', 'templates/tlspolicy.yaml.j2') | from_yaml }}"
         state: present
 
-    - name: Create other resources
+    - name: Creation of the other necessary resources
       ansible.builtin.include_tasks:
         file: resources.yaml
       loop: "{{ objects | dict2items }}"

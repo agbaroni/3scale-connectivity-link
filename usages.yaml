@@ -19,10 +19,6 @@
   ansible.builtin.set_fact:
     usage: "{{ output_usages.json | first | community.general.json_query('backend_usage.links[?rel==`backend_api`].href') }}"
 
-# - name: Test
-#   ansible.builtin.debug:
-#     var: usage
-
 - name: Get Backend URL
   ansible.builtin.uri:
     url: "{{ usage[0] }}.json?{{ query_parameters | urlencode }}"
@@ -140,22 +136,6 @@
     query_parameters:
       access_token: "{{ threescale.access_token }}"
   register: output_proxy
-
-# - ansible.builtin.debug:
-#     var: output_proxy
-
-# - name: Save OIDC issuer
-#   ansible.builtin.set_fact:
-#     oidc_issuer: "{{ output_proxy.json.proxy.oidc_issuer_endpoint | default(none, true) }}"
-#   when: output_proxy.json.proxy.oidc_issuer_endpoint is defined
-
-# - ansible.builtin.debug:
-#     var: oidc_issuer
-
-# - name: Save OIDC issuer
-#   ansible.builtin.set_fact:
-#     oidc_issuer: null
-#   when: output_proxy.json.proxy.oidc_issuer_endpoint is not defined
 
 - name: Combine with other Usages
   ansible.builtin.set_fact:
