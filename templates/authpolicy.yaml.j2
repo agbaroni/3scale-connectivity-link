@@ -1,0 +1,74 @@
+apiVersion: kuadrant.io/v1
+kind: AuthPolicy
+metadata:
+  name: {{ object.value.name }}
+  namespace: {{ object.value.project }}
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: {{ object.value.name }}
+  rules:
+    authentication:
+    {%+ if object.value.credentials.oidc_issuer is not none +%}
+      jwt-keycloak:
+        jwt:
+          issuerUrl: "{{ object.value.credentials.oidc_issuer }}"
+    {%+ elif object.value.credentials.user_key is not none +%}
+      simple-user-key:
+        apiKey:
+          selector:
+            matchLabels:
+              api_product: {{ object.value.name }}
+        credentials:
+          queryString:
+            name: user_key
+    {%+ endif +%}
+    {%+ if object.value.credentials.oidc_issuer is not none and object.value.introspection +%}
+      metadata:
+        introspection:
+          http:
+            method: POST
+            oauth2:
+            {%+ if object.value.introspection_policy_config.auth_type == "client_id+client_secret" +%}
+              clientId: "{{ object.value.credentials.custom_client_id }}"
+            {%+ elif object.value.introspection_policy_config.auth_type == "use_3scale_oidc_issuer_endpoint" +%}
+              clientId: "{{ object.value.credentials.client_id }}"
+            {%+ endif +%}
+              clientSecretRef:
+                name: "{{ object.value.name }}-introspection-client-secret"
+                key: client_secret
+            url: {{ object.value.introspection_policy_config.introspection.introspection_url }}
+    {%+ endif +%}
+    response:
+    {%+ if object.value.credentials.oidc_issuer is not none +%}
+      success:
+        headers:
+        {%+ for item in object.value.introspection_policy_config.headers +%}
+          {{ item.header }}:
+            plain:
+            {%+ if item.op == "add" +%}
+              expression: "request.headers['{{ item.header }}'] + ',' + auth.metadata.introspection.{{ item.value }}"
+            when: has(request.headers['{{ item.header }}'])
+            {%+ elif item.op == "push" +%}
+              expression: "has(request.headers['{{ item.header }}']) ? request.headers['{{ item.header }}'] + ',' + auth.metadata.introspection.{{ item.value }} : auth.metadata.introspection.{{ item.value }}"
+            {%+ elif item.op == "set" +%}
+              expression: auth.metadata.introspection.{{ item.value }}
+            {%+ endif +%}
+        {%+ endfor +%}
+    {%+ endif +%}
+      unauthorized:
+        headers:
+          "content-type":
+            value: application/json
+        body:
+        {%+ if object.value.credentials.oidc_issuer is not none +%}
+          value: |
+            {"error": "Unauthorized", "message": "Valid JWT Bearer token required"}
+        {%+ elif object.value.credentials.user_key is not none +%}
+          value: |
+            {"error": "Unauthorized", "message": "Valid user key required"}
+        {%+ endif +%}
+# TEST:
+# 1) TOKEN=$(curl -sk -X POST   https://sso.apps.cluster-jsn9w.dynamic2.redhatworkshops.io/realms/gws/protocol/openid-connect/token   -H "Content-Type: application/x-www-form-urlencoded"   -d "grant_type=client_credentials"   -d "client_id=gw1"   -d "client_secret=xvydxW9wodsgM59RyBkMhrC4VSG1Vy5I" | jq -r '.access_token')
+# 2) curl -Ik -H "Authorization: Bearer $TOKEN" https://pong.gw1.apps.cluster-jsn9w.dynamic2.redhatworkshops.io/

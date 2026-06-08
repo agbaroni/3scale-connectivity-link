@@ -10,23 +10,49 @@
     state: present
   when: object.value.enabled
 
-- name: "Create AuthPolicy (OIDC) {{ object.value.name  }}"
-  kubernetes.core.k8s:
-    definition: "{{ lookup('template', 'templates/authpolicy_oidc.yaml.j2') | from_yaml }}"
-    state: present
-  when: (not object.value.introspection) and object.value.enabled and (object.value.credentials.oidc_issuer is not none)
+- name: "Possibly extract client id and client secret from policy conf"
+  ansible.builtin.set_fact:
+    objects: >-
+      {{ objects | combine({
+        service_id: {
+          'credentials': {
+            'custom_client_id': none,
+            'custom_client_secret': none
+          }
+        }}, recursive=True)
+      }}
+  when: object.value.introspection_policy_config is not defined or object.value.introspection_policy_config.auth_type == "use_3scale_oidc_issuer_endpoint"
 
-- name: "Create AuthPolicy (OIDC - Introspected) {{ object.value.name  }}"
-  kubernetes.core.k8s:
-    definition: "{{ lookup('template', 'templates/authpolicy_oidc.yaml.j2') | from_yaml }}"
-    state: present
-  when: (object.value.introspection) and object.value.enabled and (object.value.credentials.oidc_issuer is not none)
+- name: "Possibly extract client id and client secret from policy conf"
+  ansible.builtin.set_fact:
+    objects: >-
+      {{ objects | combine({
+        service_id: {
+          'credentials': {
+            'custom_client_id': object.value.introspection_policy_config.client_id,
+            'custom_client_secret': object.value.introspection_policy_config.client_secret
+          }
+        }}, recursive=True)
+      }}
+  when: object.value.introspection_policy_config is defined and object.value.introspection_policy_config.auth_type == "client_id+client_secret"
 
-- name: "Create AuthPolicy (user_key) {{ object.value.name  }}"
+# Secret per custom_client_secret
+- name: "Create Secret (OAuth2) {{ object.value.name  }}"
   kubernetes.core.k8s:
-    definition: "{{ lookup('template', 'templates/authpolicy_user_key.yaml.j2') | from_yaml }}"
+    definition: "{{ lookup('template', 'templates/secret_oauth2.yaml.j2') | from_yaml }}"
     state: present
-  when: object.value.enabled and (object.value.credentials.user_key is not none)
+  when: object.value.enabled and object.value.credentials.introspection
+
+- name: "Create AuthPolicy {{ object.value.name  }}"
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'templates/authpolicy.yaml.j2') | from_yaml }}"
+    state: present
+  when: object.value.enabled
+
+# - name: "Create AuthPolicy {{ object.value.name  }}"
+#   debug:
+#     msg: "{{ lookup('template', 'templates/authpolicy.yaml.j2') | from_yaml }}"
+#   when: object.value.enabled
 
 - name: "Create Secret (user_key) {{ object.value.name  }}"
   kubernetes.core.k8s:

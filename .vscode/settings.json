@@ -5,10 +5,10 @@
         "enabled_product.yaml": "ansible",
         "filter_services.yaml": "ansible",
         "main.yaml": "ansible",
+        "objects.yaml": "ansible",
         "policy.yaml": "ansible",
         "product.yaml": "ansible",
         "resources.yaml": "ansible",
-        "usages.yaml": "ansible",
         "templates/cluster-issuer.yaml.j2": "jinja-yaml",
         "templates/gateway.yaml.j2": "jinja-yaml",
         "templates/gatewayclass.yaml.j2": "jinja-yaml",
@@ -17,6 +17,7 @@
         "templates/ratelimitpolicy.yaml.j2": "jinja-yaml",
         "templates/route.yaml.j2": "jinja-yaml",
         "templates/secret.yaml.j2": "jinja-yaml",
+        "templates/secret_oauth2.yaml.j2": "jinja-yaml",
         "templates/tlspolicy.yaml.j2": "jinja-yaml"
     }
 }

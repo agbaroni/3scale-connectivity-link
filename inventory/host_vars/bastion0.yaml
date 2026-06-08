@@ -11,6 +11,11 @@ threescale:
       enabled: false
     - name: pong
       enabled: true
+      # Non serve il Service perché lo posso prendere da 3scale automaticamente
+      service:
+        name: pong
+        hostname: pong.tests.svc.cluster.local
+        port: 8080
     - name: pong2
       enabled: true
       introspection: true

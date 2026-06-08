@@ -143,7 +143,9 @@
       {{ objects | combine({
         service_id: {
           'credentials': {
-            'oidc_issuer': output_proxy.json.proxy.oidc_issuer_endpoint | regex_replace('(https?://)([^@]+@)', '\1')
+            'client_id': output_proxy.json.proxy.oidc_issuer_endpoint | regex_replace(urlPattern, '\2') | default(app_client_id),
+            'client_secret': output_proxy.json.proxy.oidc_issuer_endpoint | regex_replace(urlPattern, '\3') | default(app_client_secret),
+            'oidc_issuer': output_proxy.json.proxy.oidc_issuer_endpoint | regex_replace(urlPattern, '\1\4')
           }
         }}, recursive=True)
       }}

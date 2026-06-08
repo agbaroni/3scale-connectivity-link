@@ -1,6 +1,8 @@
 ---
 - name: Migrating 3scale configurations to Connectivity Link specifics
   hosts: bastions
+  vars:
+    urlPattern: '(https?://)([^:]+):([^@]+)@(.+)'
   tasks:
     - name: Creation of the data store for collecting relevant information
       ansible.builtin.set_fact:
@@ -27,11 +29,8 @@
 
     - name: Retrieving detailed information for each Product
       ansible.builtin.include_tasks:
-        file: usages.yaml
+        file: objects.yaml
       loop: "{{ filtered_services }}"
-
-    - debug:
-        var: objects
 
     - name: Further reduction of the set of Products to be migrated
       ansible.builtin.include_tasks:
@@ -39,6 +38,9 @@
       loop: "{{ objects | dict2items }}"
       loop_control:
         loop_var: object
+
+    - debug:
+        var: objects
 
     - name: Creation of the Project where the Gateway type instance will be created
       kubernetes.core.k8s:
